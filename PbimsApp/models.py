@@ -91,6 +91,7 @@ def GetReportUrl(userid, id):
     cur.execute("SELECT   [Title]\
                           ,[Url]\
                           ,ReportDescription \
+                          ,A.DashboardId \
                       FROM [dbo].[Dashboard] A inner join\
                         [dbo].[UserDashboardMap] B on A.[DashboardId] = B.[DashboardId]\
                         and B.UserId = '" + userid + "' \
