@@ -32,20 +32,21 @@
                 <a href="{% url 'home' %}"><i class="fa fa-bar-chart-o"></i> <span class="nav-label">Home</span></a>
             </li>
 
-            <style type="text/css">
-                form> .nav>li {
-                    position: relative;
-                    display: block;
-                }
-            </style>
-            <form id="leftNavigationShowReport" method="post" enctype="multipart/form-data" action="/report">
-            {% csrf_token %}
+{#            <style type="text/css">#}
+{#                form> .nav>li {#}
+{#                    position: relative;#}
+{#                    display: block;#}
+{#                }#}
+{#            </style>#}
+
+
+
                 <li class="active">
-                    <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label">My Dashboards</span> <span class="fa arrow"></span></a>
-                    <input type="hidden" name="dashboardId" id="dashboardId" value="">
-                    <ul class="nav nav-second-level">
-                        {% for item in reportList %}
-                            <li><a href="#" id="leftNavigationShowReport{{ item.DashboardId }}">{{  item.title }}</a></li>
+                    <a href="#"><i class="fa fa-th-large"></i> My Dashboards <span class="fa arrow"></span></a>
+{#                    <input type="hidden" name="dashboardId" id="dashboardId" value="">#}
+                    <ul class="nav nav-second-level"><form id="leftNavigationShowReport" method="post" enctype="multipart/form-data" action="/report">
+            {% csrf_token %}<input type="hidden" name="dashboardId" id="dashboardId" value="">{% for item in reportList %}
+                            <li style="padding: 7px 10px 7px 10px;padding-left: 52px;border-bottom: none !important"><a style="padding: 0px ;color: #a7b1c2;font-weight: 600;" href="#" id="leftNavigationShowReport{{ item.DashboardId }}">{{  item.title }}</a></li>
                             <script>
                                 $("#leftNavigationShowReport{{ item.DashboardId }}").click(function()
                                 {
@@ -54,9 +55,10 @@
                                 });
                             </script>
                         {% endfor %}
-                    </ul>
+                    </form></ul>
                 </li>
-            </form>
+
+
 
 
 
@@ -72,6 +74,7 @@
 {#            </li>#}
 
             {% if request.session.userstatus == "admin" %}
+
                 <li class="active">
                     <a href="index.html"><i class="fa fa-th-large"></i> <span class="nav-label">Permission Access</span> <span class="fa arrow"></span></a>
                     <ul class="nav nav-second-level">
@@ -84,6 +87,7 @@
                 <li>
                     <a href="{% url 'showfeedback' %}"><i class="fa fa-certificate"></i> <span class="nav-label">View Feedbacks</span></a>
                 </li>
+
             {% endif %}
 
 
