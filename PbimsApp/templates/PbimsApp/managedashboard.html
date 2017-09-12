@@ -1,0 +1,291 @@
+{% extends "./public/dashboardBase.html" %}
+{% load static %}
+
+{% block main_content %}
+
+<div id="page-wrapper" class="gray-bg">
+
+{% include 'PbimsApp/public/CommonHeadBar.html' %}
+
+
+
+
+
+<script src="{% static "DashboardComponents/js/plugins/footable/footable.all.min.js" %}"></script>
+<link href="{% static "DashboardComponents/css/plugins/footable/footable.core.css" %}" rel="stylesheet">
+<style type="text/css">
+
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Manage Dashboards </h2>
+        <ol class="breadcrumb">
+{#                    <li>#}
+{#                        <a href="index.html">This is</a>#}
+{#                    </li>#}
+{#            <li class="active">#}
+{#                <strong>HP Dashboard</strong>#}
+{#            </li>#}
+        </ol>
+    </div>
+    <div class="col-sm-8">
+{#        <div class="title-action" style="float: right">#}
+{#            <a href="https://app.powerbi.com/view?r=eyJrIjoiMjM4NTBmYzAtYTZmYy00ZWFiLWI5YmUtYWUzNjJhZmRmYWU1IiwidCI6IjY1M2JkM2UxLTM2ZmYtNDM5OS1iMGFhLWY3ZTYzYTAyOTU5NyIsImMiOjEwfQ%3D%3D" target="_blank" class="btn btn-info">Full Screen</a>#}
+{#        </div>#}
+{#        <div class="title-action" style="float: right; margin-right: 10px;">#}
+{#            <a href="" class="btn btn-primary">Next</a>#}
+{#        </div>#}
+    </div>
+</div>
+
+
+
+
+
+
+
+<br>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+
+            {% if message|length > 0 %}
+                <div class="alert alert-info">
+                    <strong>Success! </strong> {{ message }}
+                </div>
+            {% endif %}
+            <button type="button" class="btn btn-success pull-right" data-toggle="modal"
+                    data-target="#createDashboardModal">
+                Create Dashboard
+            </button>
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Manage Dashboards</h5>
+
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-wrench"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-user">
+                            <li><a href="#">Config option 1</a>
+                            </li>
+                            <li><a href="#">Config option 2</a>
+                            </li>
+                        </ul>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <input type="text" class="form-control input-sm m-b-xs" id="filter" placeholder="Search in table">
+                    <table class="footable table table-stripped" data-page-size="8" data-filter=#filter
+                           id="dashboardTable">
+                        <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Url</th>
+                            <th>Modification Date</th>
+                            <th colspan="2">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        {% for item in dashboardList %}
+                            <tr class="gradeC">
+                                <td>{{ item.DashboardId }}</td>
+                                <td>{{ item.Title }}</td>
+                                <td>{{ item.ReportDescription }}</td>
+                                <td><a href="{{ item.Url }}" target="_blank">Link to Dashboard</a></td>
+                                <td>{{ item.ModifyDate|date:'Y-m-d H:i' }}</td>
+
+                                <td>
+                                    <button class="btn btn-warning" data-toggle="modal"
+                                            data-target="#editDashboardModal">Edit
+                                    </button>
+                                </td>
+                                <td>
+                                    <form class="form-horizontal" method="post" enctype="multipart/form-data"
+                                          action="/managedashboard">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="actionType" value="DeleteDashboard">
+                                        <input type="hidden" name="dashboardId" value="{{ item.DashboardId }}">
+                                        <button class="btn btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="5">
+                                <ul class="pagination pull-right"></ul>
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Create Dashboard Modal -->
+<div class="modal inmodal" id="createDashboardModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <i class="fa fa-laptop modal-icon"></i>
+                <h4 class="modal-title">Create Dashboard</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" method="post" enctype="multipart/form-data"
+                      action="/managedashboard">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="control-label" for="title">Title:</label>
+                        <input type="text" name="title" class="form-control" data-error="Please enter title."
+                               required/>
+                        <div class="help-block with-errors"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label" for="title">Description:</label>
+                        <input type="text" name="description" class="form-control"
+                               data-error="Please enter description." required/>
+                        <div class="help-block with-errors"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label" for="title">Url:</label>
+                        <input type="text" name="url" class="form-control" data-error="Please enter Url."
+                               required/>
+                        <div class="help-block with-errors"></div>
+                    </div>
+
+                    <input type="hidden" name="actionType" value="AddDashboard">
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Add</button>
+                        <button type="button" class="btn btn-white" data-dismiss="modal">Cancel</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Edit Dashboard Modal -->
+<div class="modal inmodal" id="editDashboardModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content animated bounceInRight">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
+                <i class="fa fa-laptop modal-icon"></i>
+                <h4 class="modal-title">Edit Dashboard</h4>
+            </div>
+
+            <div class="modal-body">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% include 'PbimsApp/public/CommonFooter.html' %}
+
+
+<link href="{% static "DashboardComponents/css/plugins/datapicker/datepicker3.css" %}" rel="stylesheet">
+<!-- Data picker -->
+<script src="{% static "DashboardComponents/js/plugins/datapicker/bootstrap-datepicker.js" %}"></script>
+<!-- Date range use moment.js same as full calendar plugin -->
+<script src="{% static "DashboardComponents/js/plugins/fullcalendar/moment.min.js" %}"></script>
+<!-- Date range picker -->
+<script src="{% static "DashboardComponents/js/plugins/daterangepicker/daterangepicker.js" %}"></script>
+
+
+<script>
+var MAGICFIGURE = 49.993;
+$(document).ready(function()
+{
+    $('.footable').footable();
+    $(".btn[data-target='#editDashboardModal']").click(function()
+    {
+        var columnHeadings = $("#dashboardTable thead th").map(function()
+        {
+            return $(this).text();
+        }).get();
+        columnHeadings.pop();
+
+        var columnValues = $(this).parent().siblings().map(function()
+        {
+             return $(this).text();
+        }).get();
+
+        var temp = $(this).parent().siblings().map(function()
+        {
+             return this;
+        }).get();
+
+        var dashboardUrl = $(temp[3].outerHTML).find('a:first').attr('href');
+        var modalBody = $('<div id="modalContent"></div>');
+        var modalForm = $('<form role="form" name="modalForm" action="/managedashboard" method="post"></form>');
+        $.each(columnHeadings, function(i, columnHeader)
+        {
+            if(i == 0)  //this is the dashboardId. Dont let user modify it
+            {
+                var formGroup = $('<div class="form-group"></div>');
+                formGroup.append('<input type="hidden" name="dashboardId" value="'+columnValues[i]+'"/>');
+                modalForm.append(formGroup);
+            }
+            else if(i==3)   //This is dashboard Url. So take the href part which is the Url
+            {
+                var formGroup = $('<div class="form-group"></div>');
+                formGroup.append('<label for="'+columnHeader+'">'+columnHeader+'</label>');
+                formGroup.append('<input class="form-control" name="'+columnHeader+'" id="'+columnHeader+'" value="'+dashboardUrl+'" required/>');
+                modalForm.append(formGroup);
+            }
+            else if(i==4)   //This is Modification date. So DO NOTHING
+            {
+            }
+            else
+            {
+                var formGroup = $('<div class="form-group"></div>');
+                formGroup.append('<label for="'+columnHeader+'">'+columnHeader+'</label>');
+                formGroup.append('<input class="form-control" name="'+columnHeader+'" id="'+columnHeader+'" value="'+columnValues[i]+'" required/>');
+                modalForm.append(formGroup);
+            }
+
+        });
+        var inputElem = document.createElement('input');
+        inputElem.type = 'hidden';
+        inputElem.name = 'csrfmiddlewaretoken';
+        inputElem.value = '{{ csrf_token }}';
+        modalForm.append(inputElem);
+        modalForm.append('<input type="hidden" name="actionType" value="EditDashboard" >');
+        modalForm.append('<div class="modal-footer"><button type="submit" class="btn btn-primary">Save Changes</button><button type="button" class="btn btn-white" data-dismiss="modal">Cancel</button></div>');
+        modalBody.append(modalForm);
+        $('.modal-body').html(modalBody);
+    });
+
+
+
+    });
+
+
+</script>
+
+{% endblock %}

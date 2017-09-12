@@ -1,0 +1,277 @@
+{% extends "./public/dashboardBase.html" %}
+{% load static %}
+
+{% block main_content %}
+
+    {#    <table>#}
+    {#        <thead>#}
+    {#            <tr>#}
+    {#                <th>OutletCode</th>#}
+    {#                <th>OutletName</th>#}
+    {#            </tr>#}
+    {#        </thead>#}
+    {#        <tbody>#}
+    {#      {% for item in result %}#}
+    {#        <tr>#}
+    {#            <td>{{ item.0 }}</td>#}
+    {#            <td>{{ item.1 }}</td>#}
+    {#        </tr>#}
+    {#      {% endfor %}#}
+    {#      </tbody>#}
+    {#    </table>#}
+
+
+
+    <div id="page-wrapper" class="gray-bg">
+
+
+        {% include 'PbimsApp/public/CommonHeadBar.html' %}
+
+
+        <div class="row wrapper border-bottom white-bg page-heading">
+            <div class="col-sm-12">
+                <h2>Filter</h2>
+                <form class="form-horizontal" method="post" enctype="multipart/form-data" action="/PbimsApp/churnanalysis">
+                {% csrf_token %}
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group"><label class="col-sm-2 control-label">Select</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control m-b" name="outletinfo">
+                                        {% for outlet in outletList %}
+                                            <option value="{{ outlet.OutletCode }}"
+                                                {% if outlet.OutletCode == selectedOutlet %}
+                                                         selected
+                                                {% endif %}>
+                                                {{ outlet.OutletName }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group" id="data_1">
+                                <label class="col-sm-3 control-label">Date Upto</label>
+                                <div class="input-group date">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input type="text" class="form-control" value="{{ selectedDate }}" name="dateupto">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-1">
+                            <div class="form-group pull-right">
+                                <div class="btn-group">
+                                    <button title="Refresh" id="Refresh" class="btn btn-primary">Refresh</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    {# Started showing tables data #}
+
+
+
+
+
+
+
+
+
+    {% for component in finalResult %}
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="wrapper wrapper-content animated fadeInUp">
+
+                    <div class="ibox">
+                        <div class="ibox-title">
+                            <h5>Table No:{{ forloop.counter }}</h5>
+                            <div class="ibox-tools">
+                                <a href="" class="btn btn-primary btn-xs">Create new project</a>
+                            </div>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="row m-b-sm m-t-sm">
+                                <div class="col-md-12">
+
+
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Period</th>
+                                                    <th>Active in Previous Month</th>
+                                                    <th>Still Active In Current Month</th>
+                                                    <th>Churn Rate</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                  {% for item in component.1 %}
+                                                    <tr>
+                                                        <th>{{ forloop.counter }}</th>
+                                                        <th>{{ item.PeriodName }}</th>
+                                                        <td>{{ item.ActiveInLastMonth }}</td>
+                                                        <td>{{ item.StillActiveInCurrentMonth }}</td>
+                                                        <td>{{ item.ChurnRate|floatformat:2 }}</td>
+                                                    </tr>
+                                                  {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <div class="col-lg-6">
+                <div class="wrapper wrapper-content animated fadeInUp">
+
+                    <div class="ibox">
+                        <div class="ibox-title">
+                            <h5>Chart {{ forloop.counter }}</h5>
+                            <div class="ibox-tools">
+                                <a href="" class="btn btn-primary btn-xs">Create new project</a>
+                            </div>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="row m-b-sm m-t-sm">
+                                <div class="col-md-12">
+
+
+                                    <div id="{{ component.0 }}" style="width: 100%; height: 400px"></div>
+                                    <script>
+                                        var temp = {{ component.2|safe }};
+                                        var jsonData = $.parseJSON(JSON.stringify(temp));
+                                        console.log(jsonData);
+                                        AMBarChartSingleMetric(jsonData, "{{ component.0 }}", "DD", "Sales", "time", "Sales");
+                                    </script>
+
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    {% include 'PbimsApp/public/CommonFooter.html' %}
+
+    </div>
+
+
+<link href="{% static "DashboardComponents/css/plugins/datapicker/datepicker3.css" %}" rel="stylesheet">
+<!-- Data picker -->
+<script src="{% static "DashboardComponents/js/plugins/datapicker/bootstrap-datepicker.js" %}"></script>
+<!-- Date range use moment.js same as full calendar plugin -->
+<script src="{% static "DashboardComponents/js/plugins/fullcalendar/moment.min.js" %}"></script>
+<!-- Date range picker -->
+<script src="{% static "DashboardComponents/js/plugins/daterangepicker/daterangepicker.js" %}"></script>
+
+
+<script>
+var MAGICFIGURE = 49.993;
+$(document).ready(function()
+{
+        $('#data_1 .input-group.date').datepicker({
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            calendarWeeks: true,
+            autoclose: true,
+            format: "yyyy-mm-dd"
+        });
+
+        $('#data_2 .input-group.date').datepicker({
+            startView: 1,
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            autoclose: true,
+            format: "dd/mm/yyyy"
+        });
+
+        $('#data_3 .input-group.date').datepicker({
+            startView: 2,
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            autoclose: true
+        });
+
+        $('#data_4 .input-group.date').datepicker({
+            minViewMode: 1,
+            keyboardNavigation: false,
+            forceParse: false,
+            forceParse: false,
+            autoclose: true,
+            todayHighlight: true
+        });
+
+        $('#data_5 .input-daterange').datepicker({
+            keyboardNavigation: false,
+            forceParse: false,
+            autoclose: true
+        });
+
+
+        $('#reportrange').daterangepicker({
+            format: 'MM/DD/YYYY',
+            startDate: moment().subtract(29, 'days'),
+            endDate: moment(),
+            minDate: '01/01/2012',
+            maxDate: '12/31/2015',
+            dateLimit: { days: 60 },
+            showDropdowns: true,
+            showWeekNumbers: true,
+            timePicker: false,
+            timePickerIncrement: 1,
+            timePicker12Hour: true,
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            opens: 'right',
+            drops: 'down',
+            buttonClasses: ['btn', 'btn-sm'],
+            applyClass: 'btn-primary',
+            cancelClass: 'btn-default',
+            separator: ' to ',
+            locale: {
+                applyLabel: 'Submit',
+                cancelLabel: 'Cancel',
+                fromLabel: 'From',
+                toLabel: 'To',
+                customRangeLabel: 'Custom',
+                daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
+                monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                firstDay: 1
+            }
+        }, function(start, end, label) {
+            console.log(start.toISOString(), end.toISOString(), label);
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        });
+
+        //AMBarChartSingleMetric(jsondata, container, categoryAxisMinPeriod, kpi1, axisXLabel, axisYLabel);
+
+
+    });
+
+
+</script>
+
+{% endblock %}
