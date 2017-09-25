@@ -65,14 +65,16 @@ def home(request):
 
 def report(request):
     reportList = UserPanel().GetDashboardsByUser(request.session['userid'])
+    pbiembeddedtoken = {}
     if request.method == 'POST':
         dashboardId = request.POST.get('dashboardId') if request.POST.get('dashboardId') else request.POST.get('selectedDashboardId')
         reportRow = GetReportUrl(request.session['userid'], dashboardId)
         print(reportRow)
+        pbiembeddedtoken = Dashboard().GetPBIEmbeddedToken(reportRow[0]['GroupId'], reportRow[0]['ReportId'])
     else:
         reportRow = []
         reportRow.append({})
-    return render(request, 'PbimsApp/report.html', {'dataset': reportRow[0], 'reportList':reportList, 'PageTitle': 'View Report'})
+    return render(request, 'PbimsApp/report.html', {'dataset': reportRow[0], 'reportList':reportList, 'pbiEmbeddedToken': pbiembeddedtoken, 'PageTitle': 'View Report'})
 
 def managedashboard(request):
     alertMessage = ""

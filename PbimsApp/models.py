@@ -2,6 +2,7 @@ from django.db import models
 from django.db import connection, connections
 import json
 import datetime
+import urllib
 
 # Get all Outlets list in the form of dictionary
 def GetAllOutlets():
@@ -92,6 +93,8 @@ def GetReportUrl(userid, id):
                           ,[Url]\
                           ,ReportDescription \
                           ,A.DashboardId \
+                          ,A.GroupId    \
+                          ,A.ReportId   \
                       FROM [dbo].[Dashboard] A inner join\
                         [dbo].[UserDashboardMap] B on A.[DashboardId] = B.[DashboardId]\
                         and B.UserId = '" + userid + "' \
@@ -161,6 +164,15 @@ class Dashboard():
         cur.execute(updare_report_order)
         cur.close()
 
+    def GetPBIEmbeddedToken(self, groupId, reportId):
+        pbitoken = {}
+        with urllib.request.urlopen(
+                                        "http://192.168.100.61:90/pbiembeddedapi/Home/EmbedReport/" + groupId + "/" + reportId) as url:
+            data = json.loads(url.read().decode())
+            pbitoken['EmbedToken'] = data['EmbedToken']['Token']
+            pbitoken['EmbedUrl'] = data['EmbedUrl']
+            pbitoken['Id'] = data['Id']
+        return pbitoken
 
 
 
